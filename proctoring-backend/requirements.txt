@@ -8,3 +8,7 @@ python-multipart
 python-dotenv
 email-validator
 psycopg[binary]
+pwdlib[argon2]
+python-multipart
+PyJWT
+alembic
