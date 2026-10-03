@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: proctorx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proctorx
+
+  redis:
+    image: redis:7-alpine
+    container_name: proctorx-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proctorx
+
+  backend:
+    build:
+      context: ./proctoring-backend
+      dockerfile: Dockerfile
+    container_name: proctorx-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - question_uploads:/app/app/uploads
+    networks:
+      - proctorx
+
+  frontend:
+    build:
+      context: ./proctoring-frontend
+      dockerfile: Dockerfile
+    container_name: proctorx-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - proctorx
+
+volumes:
+  postgres_data:
+  redis_data:
+  question_uploads:
+
+networks:
+  proctorx:
+    driver: bridge

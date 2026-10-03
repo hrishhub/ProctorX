@@ -13,9 +13,13 @@ load_dotenv(ENV_FILE)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
+<<<<<<< Updated upstream
     raise RuntimeError(
         f"DATABASE_URL is not configured. Expected .env at: {ENV_FILE}"
     )
+=======
+    raise RuntimeError(f"DATABASE_URL is not configured. Expected .env at: {ENV_FILE}")
+>>>>>>> Stashed changes
 
 engine = create_engine(
     DATABASE_URL,
