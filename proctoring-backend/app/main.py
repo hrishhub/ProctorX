@@ -1,4 +1,7 @@
 from pathlib import Path
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +23,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "CORS_ORIGINS",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ],
@@ -57,4 +61,12 @@ def root():
 def health():
     return {
         "status": "healthy",
+    }
+    
+
+@app.get("/debug/cors")
+def debug_cors():
+    return {
+        "cors_origins": os.getenv("CORS_ORIGINS"),
+        "environment": os.getenv("ENVIRONMENT"),
     }
